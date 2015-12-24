@@ -1,12 +1,100 @@
 var express = require('express');
 var router = express.Router();
 
+//jwt
+var jwt = require('jsonwebtoken');
+var expressJwt = require('express-jwt');
+var jwtSecret = 'yoyoyoyoyooyoy';
+//protected
+// router.use(expressJwt({secret: process.env.SECRET}).unless({ path: [ '/login', '/register' ] }));
+
 //pg config
 var pg = require('pg');
 var conString = 'postgres://@localhost/chess_db';
 
 //bcrypt
 var bcrypt = require('bcrypt');
+
+
+//-------JWT AUTH--------
+router.post('/login', function(req, res, next) {
+  if(req.body.user.email == "" || req.body.user.password == "") {
+    res.status(400).end('Must provide username and password');
+  }
+  pg.connect(conString, function(err, client, done) {
+    if (err) {
+      return console.error('error fetching client from pool', err);
+    }
+    console.log("connected to database");
+    client.query('SELECT * FROM users WHERE username = $1', [req.body.user.username], function(err, result) {
+      if (err) {
+        return console.error('error running query', err);
+      } else if (result.rows.length < 1) {
+        res.status(400).end('User not found');
+      } else {
+        var hash = result.rows[0].password; 
+        bcrypt.compare(req.body.user.password, hash, function(err, bcryptRes) {
+          if(err || bcryptRes == false) {
+            res.status(400).end('Password incorrect');
+          }
+          if(bcryptRes == true) {
+            client.query('SELECT * FROM users WHERE username = $1 AND password = $2', [req.body.user.username, hash], function(err, result) {
+              done();
+              if (err) {
+                return console.error('error running query', err);
+              } else if (result.rows.length < 1) {
+                res.status(400).end('User or password incorrect');
+              } else if (bcryptRes == true) {
+                var token = jwt.sign({
+                  id: result.rows[0].id
+                }, jwtSecret);
+                client.query('UPDATE users SET token = $2  WHERE id = $1', [result.rows[0].id, token], function(err, result) {
+                  done();
+                  if (err) {
+                    return console.error('error running query', err);
+                  }
+                  res.send({
+                    token: token
+                  });
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+});
+
+//register
+router.post('/register', function(req, res, next) {
+  pg.connect(conString, function(err, client, done) {
+    if (err) {
+      return console.error('error fetching client from pool', err);
+    }
+    console.log("connected to database");
+    bcrypt.hash(req.body.user.password, 8, function(err, hash) {
+      client.query('INSERT INTO users(username, password, online, token) VALUES($1, $2, $3, $4) returning id', [req.body.user.username, hash, null, null], function(err, result) {
+        done();
+        if(err) {
+          return console.error('error running query', err);
+        }
+        var token = jwt.sign({
+          id: result.rows[0].id
+        }, jwtSecret);
+        client.query('UPDATE users SET token = $2  WHERE id = $1', [result.rows[0].id, token], function(err, result) {
+          done();
+          if (err) {
+            return console.error('error running query', err);
+          }
+          res.send({
+            token: token
+          });
+        });
+      });
+    });
+  });
+});
 
 
 //-----------USERS--------

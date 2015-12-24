@@ -211,6 +211,13 @@
       </md-tab>
       <md-tab label="history">
       </md-tab>
+      <div ng-controller="RegisterLoginController">
+        <md-tab class="register-tab" label="register" md-on-select="showRegister($event)" layout="right end">
+        </md-tab>
+        <md-tab class="login-tab" label="login" md-on-select="showLogin($event)">
+        </md-tab>
+      </div>
+      </div>
     </md-tabs>
   </md-content>
 </div>
