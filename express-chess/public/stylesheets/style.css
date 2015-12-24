@@ -1,0 +1,73 @@
+* {
+  margin: 0;
+}
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  height: 100%;
+  padding-bottom: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+.ng-view {
+  padding-bottom: 100px;
+}
+a {
+  color: #00B7FF;
+}
+.footer-custom {
+  background-color: #001B29;
+  color: #AAA;
+  text-align: center;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 50px;
+}
+.tab {
+  text-align: center;
+}
+md-tabs {
+  height: 100%;
+}
+.top-row {
+  margin-top: 40px;
+}
+
+.board-wrapper {
+  position: relative;
+}
+#board {
+  width: 408px;
+  margin: 0 auto;
+}
+
+.md-info-wrapper, .md-table-wrapper {
+  height: 542px;
+}
+.md-table-wrapper, .md-chat-wrapper, .md-board-wrapper {
+  overflow: auto;
+}
+.opponent-box {
+  margin-bottom: 14px;
+}
+.self-box {
+  margin-top: 14px;
+}
+.name {
+  padding-bottom: 5px;
+}
+.game-table {
+  width: 100%;
+}
+th, td {
+  border: 1px solid #D3D3D3;
+  padding: 10px;
+}
+tr:nth-child(even) {background-color: #f2f2f2}
+
+.md-chat-wrapper {
+  height: 216px;
+}

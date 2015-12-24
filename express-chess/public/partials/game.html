@@ -1,0 +1,218 @@
+<div class="tabs" layout="column" style="height: 1000px;" ng-cloak>
+  <md-content class="md-padding" style="height: 1000px;">
+    <md-tabs md-border-bottom md-autoselect>
+      <md-tab class="game-tab" label="game">
+        <div ng-cloak>
+          <md-content class="top-row" layout="row" layout-wrap layout-align="center start" layout-xs="column">
+            <div class="info-container" flex="25" flex-sm="0" flex-xs="0" flex-md="0" layout="column">
+              <md-card>
+                <md-card-content class="md-info-wrapper">
+                </md-card-content>
+              </md-card>
+            </div>
+            <div class="board-container" flex-sm="100" flex-xs="100" flex-md="100" layout="column">
+              <md-card>
+                <md-card-content class="md-board-wrapper">
+                  <div class="opponent-box text-center">
+                    <div class="name opponentName">Opponent Name</div>
+                    <div class="time opponentTime">15:00</div>
+                  </div>
+                  <div class="board-wrapper">
+                    <div id="board"></div>
+                  </div>
+                  
+                  <script>
+                    var socket = io.connect('http://localhost:3000');
+
+                    var board,
+                      game = new Chess(),
+                      statusEl = $('#status'),
+                      fenEl = $('#fen'),
+                      pgnEl = $('#pgn');
+
+                    // do not pick up pieces if the game is over
+                    // only pick up pieces for the side to move
+                    var onDragStart = function(source, piece, position, orientation) {
+                      if (game.game_over() === true ||
+                          (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                        return false;
+                      }
+                    };
+
+                    var onDrop = function(source, target) {
+                      // see if the move is legal
+                      var move = game.move({
+                        from: source,
+                        to: target,
+                        promotion: 'q' // NOTE: always promote to a queen for example simplicity
+                      });
+
+                      // illegal move
+                      if (move === null) return 'snapback';
+
+                      // updateStatus();
+                    };
+
+                    // update the board position after the piece snap 
+                    // for castling, en passant, pawn promotion
+                    var onSnapEnd = function() {
+                      socket.emit('move made', game.pgn());
+                    };
+
+                    var updateStatus = function() {
+                      var status = '';
+
+                      var moveColor = 'White';
+                      if (game.turn() === 'b') {
+                        moveColor = 'Black';
+                      }
+
+                      // checkmate?
+                      if (game.in_checkmate() === true) {
+                        status = 'Game over, ' + moveColor + ' is in checkmate.';
+                      }
+
+                      // draw?
+                      else if (game.in_draw() === true) {
+                        status = 'Game over, drawn position';
+                      }
+
+                      // game still on
+                      else {
+                        status = moveColor + ' to move';
+
+                        // check?
+                        if (game.in_check() === true) {
+                          status += ', ' + moveColor + ' is in check';
+                        }
+                      }
+
+                      statusEl.html(status);
+                      fenEl.html(game.fen());
+                      pgnEl.html(game.pgn());
+                    };
+
+                    var cfg = {
+                      draggable: true,
+                      position: 'start',
+                      onDragStart: onDragStart,
+                      onDrop: onDrop,
+                      onSnapEnd: onSnapEnd
+                    };
+                    board = ChessBoard('board', cfg);
+                    
+                    //socket listens for move
+                    socket.on('move made', function (newPosition) {
+                      game.load_pgn(newPosition);
+                      board.position(game.fen());
+
+                      updateStatus();
+                    });
+                  </script>
+
+                  <div class="self-box text-center" layout="end">
+                    <div class="name myName">My Name</div>
+                    <div class="time myTime">15:00</div>
+                  </div>
+                </md-card-content>
+              </md-card>
+            </div>
+            <div class="table-container" flex="25" flex-sm="100" flex-xs="100" flex-md="100" layout="column">
+              <md-card>
+                <md-card-content class="md-table-wrapper">
+                  <table class="game-table text-center">
+                    <tr>
+                      <td>1.</td>
+                      <td>e4</td>
+                      <td>e5</td> 
+                    </tr>
+                    <tr>
+                      <td>2.</td>
+                      <td>Nc3</td>
+                      <td>Nf6</td>
+                    </tr>
+                    <tr>
+                      <td>1.</td>
+                      <td>e4</td>
+                      <td>e5</td> 
+                    </tr>
+                    <tr>
+                      <td>2.</td>
+                      <td>Nc3</td>
+                      <td>Nf6</td>
+                    </tr> <tr>
+                      <td>1.</td>
+                      <td>e4</td>
+                      <td>e5</td> 
+                    </tr>
+                    <tr>
+                      <td>2.</td>
+                      <td>Nc3</td>
+                      <td>Nf6</td>
+                    </tr> <tr>
+                      <td>1.</td>
+                      <td>e4</td>
+                      <td>e5</td> 
+                    </tr>
+                    <tr>
+                      <td>2.</td>
+                      <td>Nc3</td>
+                      <td>Nf6</td>
+                    </tr> <tr>
+                      <td>1.</td>
+                      <td>e4</td>
+                      <td>e5</td> 
+                    </tr>
+                    <tr>
+                      <td>2.</td>
+                      <td>Nc3</td>
+                      <td>Nf6</td>
+                    </tr> <tr>
+                      <td>1.</td>
+                      <td>e4</td>
+                      <td>e5</td> 
+                    </tr>
+                    <tr>
+                      <td>2.</td>
+                      <td>Nc3</td>
+                      <td>Nf6</td>
+                    </tr>
+                  </table>
+                </md-card-content>
+              </md-card>
+            </div>
+          </md-content>
+        </div>
+        <div ng-cloak>
+          <md-content layout="row" layout-wrap layout-align="center start" layout-xs="column">
+            <div class="buttons-container" flex="80" flex-sm="100" flex-xs="100" flex-md="100" layout="column">
+              <md-card>
+                <md-card-actions layout="row" layout-align="center">
+                 <md-button>Takeback</md-button>
+                 <md-button>Draw</md-button>
+                 <md-button>Resign</md-button>
+               </md-card-actions>
+              </md-card>
+            </div>
+          </md-content>
+        </div>
+        <div ng-cloak>
+          <md-content layout="row" layout-wrap layout-align="center start" layout-xs="column">
+            <div class="chat-container" flex="60" flex-sm="100" flex-xs="100" flex-md="100" layout="column">
+              <md-card>
+                <md-card-content class="md-chat-wrapper">
+                  yoo
+                </md-card-content>
+              </md-card>
+            </div>
+          </md-content>
+        </div>
+      </md-tab>
+      <md-tab label="history">
+      </md-tab>
+    </md-tabs>
+  </md-content>
+</div>
+
+<!-- <script src="/javascripts/chess-client.js"></script> -->
