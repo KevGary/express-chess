@@ -1,17 +1,26 @@
 var app = angular.module('app', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngAnimate'], function config($httpProvider) {
   $httpProvider.interceptors.push('AuthInterceptor');
 });
+//----APP CONSTANTS----
+app.constant('API_URL', 'http://localhost:3001');
 
-app.constant('API_URL', 'http://localhost:3000');
 
-app.controller('GlobalController', function ($scope) {
-  $scope.message = 'yo';
+//----CONTROLLERS-----
+app.controller('GlobalController', function ($scope, $rootScope, $q, UserFactory, $location) {
+  UserFactory.getUser().then(function success (response) {
+    $rootScope.user = response.data;
+    if ($rootScope.user) {
+      $location.url('/game');
+      $location.path('/game');
+    }
+  });
 });
-app.controller('GameController', function ($scope) {
-  $scope.message = 'yo';
+
+app.controller('LandingController', function ($scope) {
+
 });
 
-app.controller('RegisterLoginController', function ($scope, $rootScope, $mdDialog, $mdMedia) {
+app.controller('NavbarController', function ($scope, $rootScope, $mdDialog, $mdMedia, UserFactory, $location) {
   $rootScope.selectedIndex = 0;
   $scope.showRegister = function(ev) {
     $rootScope.selectedIndex = 0;
@@ -33,8 +42,14 @@ app.controller('RegisterLoginController', function ($scope, $rootScope, $mdDialo
       clickOutsideToClose: true
     })
   }
+  $scope.logout = function() {
+    UserFactory.logout();
+    $location.url('/');
+    $location.path('/');
+  }
 });
-function DialogController($rootScope, $scope, $mdDialog, $mdDialog) {
+function DialogController($rootScope, $scope, $mdDialog) {
+  //----md actions-----
   $scope.selectedIndex = $rootScope.selectedIndex;
   $scope.hide = function() {
     $mdDialog.hide();
@@ -46,143 +61,37 @@ function DialogController($rootScope, $scope, $mdDialog, $mdDialog) {
     $mdDialog.hide(answer);
   };
 }
-app.controller('LoginRegisterModalController', function($scope, UserFactory) {
+
+app.controller('LoginRegisterModalController', function ($scope, UserFactory, $location, $mdDialog, $q) {
+  //----ng-clicks----
   $scope.login = function(user) {
     UserFactory.login(user).then(function success(response) {
-      console.log(response);
-      console.log('successful log in');
-    }, handleError);
+      return UserFactory.getUser()
+    }, handleError).then(function success (response) {
+      $scope.user = response.data;
+      $mdDialog.hide();
+      $location.url('/game');
+      $location.path('/game');
+    })
   }
   $scope.register = function(user) {
     UserFactory.register(user).then(function success(response) {
-      console.log(response);
-      console.log('successful registration');
-    }, handleError);
+      return UserFactory.getUser()
+    }, handleError).then(function success (response) {
+      console.log(response)
+      $scope.user = response.data;
+      $mdDialog.hide();
+      $location.url('/game');
+      $location.path('/game');
+    })
   }
   function handleError(response) {
     alert('Error: ' + response.data);
+    $location.url('/page-not-found');
+    $location.path('/page-not-found');
   }
 });
 
-app.controller('NavbarController', function ($scope) {
-  $scope.message = 'yo';
+app.controller('GameController', function ($scope, UserFactory, $q) {
+ 
 });
-
-
-app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, $mdThemingProvider){
-  $routeProvider
-    .when('/', {
-      templateUrl: '/partials/landing.html',
-      controller: 'LandingController'
-    })
-    // .when('/register', {
-    //   templateUrl: '/partials/register.html',
-    //   controller: 'RegisterController'
-    // }) 
-    // .when('/login', {
-    //   templateUrl: '/partials/login.html',
-    //   controller: 'LoginController'
-    // }) 
-    // .when('/lobby', {
-    //   templateUrl: '/partials/lobby.html',
-    //   controller: 'LobbyController'
-    // })
-    .when('/game', {
-      templateUrl: '/partials/game.html',
-      controller: 'GameController'
-    })
-    // .when('/history', {
-    //   templateUrl: '/partials/history.html',
-    //   controller: 'HistoryController'
-    // })      
-    .when('/page-not-found', {
-      templateUrl: '/partials/error.html'
-    })
-    .otherwise({
-      redirectTo: '/page-not-found'
-    });
-  $locationProvider.html5Mode(true);
-}]);
-
-//JWT AUTH FACTORIES
-app.factory('UserFactory', function UserFactory($http, $q, API_URL, AuthTokenFactory) {
-  'use strict';
-  return {
-    register: register,
-    login: login,
-    logout: logout
-    // getUser: getUser
-  };
-
-  function register(user){
-    return $http.post(API_URL + '/register',
-    {
-      "user": user
-    })
-    .then(function success(response) {
-      AuthTokenFactory.setToken(response.data.token);
-      return response;
-    });
-  }
-
-  function login(user){
-    return $http.post(API_URL + '/login',
-    {
-      "user": user
-    })
-    .then(function success(response) {
-      AuthTokenFactory.setToken(response.data.token);
-      return response;
-    });
-  }
-  
-
-  function logout() {
-    AuthTokenFactory.setToken();
-    return null;
-  }
-
-  // function getUser() {
-  //   if(AuthTokenFactory.getToken()) {
-  //     return $http.get(API_URL2 + '/me')
-  //   } else {
-  //     return $q.reject({ data: 'client has no authorization '})
-  //   }
-  // }
-})
-app.factory('AuthTokenFactory', function AuthTokenFactory($window) {
-  'use strict';
-  var store = $window.localStorage;
-  var key = 'auth_token';
-  return {
-    getToken: getToken,
-    setToken: setToken
-  };
-
-  function getToken() {
-    return store.getItem(key);
-  }
-
-  function setToken(token){
-    if (token) {
-      store.setItem(key, token);
-    } else {
-      store.removeItem(key);
-    }
-  }
-})
-app.factory('AuthInterceptor', function AuthInterceptor(AuthTokenFactory) {
-  return {
-    request: addToken
-  };
-
-  function addToken(config) {
-    var token = AuthTokenFactory.getToken();
-    if(token) {
-      config.headers = config.headers || {};
-      config.headers.Authorization = 'Bearer ' + token;
-    }
-    return config;
-  }
-})
-//END JWT AUTH FACTORIES

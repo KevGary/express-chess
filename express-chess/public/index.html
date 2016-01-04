@@ -15,6 +15,26 @@
 </head>
 <body ng-controller="GlobalController">
 
+  <div ng-controller="NavbarController" ng-cloak>
+    <md-content>
+      <md-toolbar>
+        <div class="md-toolbar-tools">
+          <h1>
+            <span>Express Chess</span>
+          </h1>
+          <span flex> </span>
+          <section ng-hide="user" ng-cloak layout="row" layout="column" layout-align="center center" layout-wrap>
+            <md-button class="md-raised md-primary" ng-click="showRegister($event)">Register</md-button>
+            <md-button class="md-raised md-primary" ng-click="showLogin($event)">Login</md-button>
+          </section>
+          <section ng-show="user" ng-cloak layout="row" layout="column" layout-align="center center" layout-wrap>
+            <md-button class="md-raised md-primary" ng-click="logout($event)">Logout</md-button>
+          </section>
+        </div>
+      </md-toolbar>
+    </md-content>
+  </div>
+
   <div class="ng-view">
   </div>
 
@@ -42,5 +62,7 @@
   <script src="/javascripts/chessboard-0.3.0.js"></script>
   <script src="/javascripts/chess.js"></script>
   <script src="/javascripts/ng-app.js"></script>
+  <script src="/javascripts/jwt-factories.js"></script>
+  <script src="/javascripts/ng-config.js"></script>
 </body>
 </html>

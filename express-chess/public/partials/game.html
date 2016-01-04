@@ -1,6 +1,6 @@
 <div class="tabs" layout="column" style="height: 1000px;" ng-cloak>
   <md-content class="md-padding" style="height: 1000px;">
-    <md-tabs md-border-bottom md-autoselect>
+    <md-tabs md-border-bottom md-autoselect md-swipe-content>
       <md-tab class="game-tab" label="game">
         <div ng-cloak>
           <md-content class="top-row" layout="row" layout-wrap layout-align="center start" layout-xs="column">
@@ -211,12 +211,13 @@
       </md-tab>
       <md-tab label="history">
       </md-tab>
-      <div ng-controller="RegisterLoginController">
-        <md-tab class="register-tab" label="register" md-on-select="showRegister($event)" layout="right end">
+    <!--   <div ng-controller="RegisterLoginController"> -->
+        <!-- <md-tab class="register-tab" label="register" md-on-select="showRegister($event)" layout="column" layout-align="center end">
         </md-tab>
-        <md-tab class="login-tab" label="login" md-on-select="showLogin($event)">
-        </md-tab>
-      </div>
+        <md-tab class="login-tab" label="login" md-on-select="showLogin($event)" layout="column" layout-align="center end">
+        </md-tab> -->
+        <!-- <md-button class="md-raised" layout="column" layout-align="center end" style="margin-left: 200px;">yosef</md-button> -->
+ <!--      </div> -->
       </div>
     </md-tabs>
   </md-content>
