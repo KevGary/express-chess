@@ -8,6 +8,7 @@ app.constant('API_URL', 'http://localhost:3001');
 //----CONTROLLERS-----
 app.controller('GlobalController', function ($scope, $rootScope, $q, UserFactory, $location) {
   UserFactory.getUser().then(function success (response) {
+    console.log(response);
     $rootScope.user = response.data;
     if ($rootScope.user) {
       $location.url('/game');
@@ -93,5 +94,5 @@ app.controller('LoginRegisterModalController', function ($scope, UserFactory, $l
 });
 
 app.controller('GameController', function ($scope, UserFactory, $q) {
- 
+  
 });

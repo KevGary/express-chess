@@ -11,6 +11,17 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+app.use(cors());
+
+//expose socket.io
+var io = socket_io();
+app.io = io;
+
+io.on('connection', function (socket) {
+  socket.on('move made', function (newPosition) {
+    io.emit('move made', newPosition);
+  })
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

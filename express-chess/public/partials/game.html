@@ -22,7 +22,7 @@
                   </div>
                   
                   <script>
-                    var socket = io.connect('http://localhost:3000');
+                    var socket = io.connect('http://localhost:3001');
 
                     var board,
                       game = new Chess(),
@@ -112,7 +112,7 @@
                   </script>
 
                   <div class="self-box text-center" layout="end">
-                    <div class="name myName">My Name</div>
+                    <div class="name myName">{{user.username}}</div>
                     <div class="time myTime">15:00</div>
                   </div>
                 </md-card-content>
@@ -211,13 +211,6 @@
       </md-tab>
       <md-tab label="history">
       </md-tab>
-    <!--   <div ng-controller="RegisterLoginController"> -->
-        <!-- <md-tab class="register-tab" label="register" md-on-select="showRegister($event)" layout="column" layout-align="center end">
-        </md-tab>
-        <md-tab class="login-tab" label="login" md-on-select="showLogin($event)" layout="column" layout-align="center end">
-        </md-tab> -->
-        <!-- <md-button class="md-raised" layout="column" layout-align="center end" style="margin-left: 200px;">yosef</md-button> -->
- <!--      </div> -->
       </div>
     </md-tabs>
   </md-content>
